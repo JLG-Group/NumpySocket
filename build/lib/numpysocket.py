@@ -2,7 +2,7 @@
 
 import socket
 import numpy as np
-from io import StringIO
+from io import BytesIO
 
 
 class NumpySocket():
@@ -42,11 +42,11 @@ class NumpySocket():
         if not isinstance(image, np.ndarray):
             print('not a valid numpy image')
             return
-        f = StringIO()
+        f = BytesIO()
         np.savez_compressed(f, frame=image)
         f.seek(0)
         out = f.read()
-        val = "{0}:".format(len(f.getvalue()))  # prepend length of array
+        val = "{0}:".format(len(f.getvalue())).encode()  # prepend length of array
         out = val + out
         try:
             self.socket.sendall(out)
@@ -75,7 +75,7 @@ class NumpySocket():
             return
 
         length = None
-        ultimate_buffer = ""
+        ultimate_buffer = b""
         while True:
             data = self.client_connection.recv(1024)
             ultimate_buffer += data
@@ -83,11 +83,11 @@ class NumpySocket():
                 break
             while True:
                 if length is None:
-                    if ':' not in ultimate_buffer:
+                    if b':' not in ultimate_buffer:
                         break
                     # remove the length bytes from the front of ultimate_buffer
                     # leave any remaining bytes in the ultimate_buffer!
-                    length_str, ignored, ultimate_buffer = ultimate_buffer.partition(':')
+                    length_str, ignored, ultimate_buffer = ultimate_buffer.partition(b':')
                     length = int(length_str)
                 if len(ultimate_buffer) < length:
                     break
@@ -96,6 +96,6 @@ class NumpySocket():
                 ultimate_buffer = ultimate_buffer[length:]
                 length = None
                 break
-        final_image = np.load(StringIO(ultimate_buffer))['frame']
+        final_image = np.load(BytesIO(ultimate_buffer))['frame']
         print('frame received')
         return final_image

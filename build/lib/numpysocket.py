@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import socket
 import numpy as np
 from io import BytesIO
@@ -25,9 +23,9 @@ class NumpySocket():
         self.port = port
         try:
             self.socket.connect((self.address, self.port))
-            print('Connected to %s on port %s' % (self.address, self.port))
+            #print('Connected to %s on port %s' % (self.address, self.port))
         except socket.error as e:
-            print('Connection to %s on port %s failed: %s' % (self.address, self.port, e))
+            #print('Connection to %s on port %s failed: %s' % (self.address, self.port, e))
             return
 
     def endServer(self):
@@ -36,11 +34,11 @@ class NumpySocket():
 
     def sendNumpy(self, image):
         if self.type is not "server":
-            print("Not setup as a server")
+            #print("Not setup as a server")
             return
 
         if not isinstance(image, np.ndarray):
-            print('not a valid numpy image')
+            #print('not a valid numpy image')
             return
         f = BytesIO()
         np.savez_compressed(f, frame=image)
@@ -52,7 +50,7 @@ class NumpySocket():
             self.socket.sendall(out)
         except Exception:
             exit()
-        print('image sent')
+        #print('image sent')
 
     def startClient(self, port):
         self.type = "client"
@@ -61,9 +59,9 @@ class NumpySocket():
 
         self.socket.bind((self.address, self.port))
         self.socket.listen(1)
-        print('waiting for a connection...')
+        #print('waiting for a connection...')
         self.client_connection, self.client_address = self.socket.accept()
-        print('connected to ', self.client_address[0])
+        #print('connected to ', self.client_address[0])
 
     def endClient(self):
         self.client_connection.shutdown(1)
@@ -71,7 +69,7 @@ class NumpySocket():
 
     def recieveNumpy(self):
         if self.type is not "client":
-            print("Not setup as a client")
+            #print("Not setup as a client")
             return
 
         length = None
@@ -97,5 +95,5 @@ class NumpySocket():
                 length = None
                 break
         final_image = np.load(BytesIO(ultimate_buffer))['frame']
-        print('frame received')
+        #print('frame received')
         return final_image

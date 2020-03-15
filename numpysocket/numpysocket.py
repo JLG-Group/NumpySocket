@@ -2,7 +2,7 @@
 
 import socket
 import numpy as np
-from cStringIO import StringIO
+from io import StringIO
 
 
 class NumpySocket():
